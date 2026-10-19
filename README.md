@@ -1,40 +1,50 @@
-VectorVault – A minimalist code-hosting platform for Nigerian developers
-
 # VectorVault
 
-### Code. Create. Collaborate.
+### Minimalist code hosting for Nigerian devs.
 
-VectorVault is a simple, modern code-hosting and developer collaboration platform designed to make building, storing and sharing code easier for Nigerian developers.
+Built by Vector Codes.
 
-## Our Mission
+---
 
-To make code hosting and project collaboration more accessible to student developers, freelancers and the wider African developer community.
+## About
+
+VectorVault is a code-hosting and developer platform designed to make storing, managing and sharing code simple and accessible.
+
+We're building a platform with Nigerian student developers, freelancers and the wider African developer community in mind.
+
+## Vision
+
+Making code hosting simpler, more accessible and more connected.
 
 ## Planned Features
 
-- Developer accounts and profiles
-- Create and manage repositories
-- Upload and store source code
-- Public and private repositories
-- Browse and discover projects
-- Share projects with other developers
-- Git integration (coming later)
+- [ ] User registration and authentication
+- [ ] Developer profiles
+- [ ] Repository creation
+- [ ] File uploads and storage
+- [ ] Public and private repositories
+- [ ] Source code viewer
+- [ ] Project discovery
+- [ ] Repository sharing
+- [ ] Git integration
 
-## Technology Stack
+## Technology
 
 - Next.js
 - Tailwind CSS
 - Supabase
 - Vercel
 
-## Founder
-
-Prince Eric
-
-Built under Vector Codes.
-
 ## Project Status
 
-Currently in development. 🚧
+Currently under development.
 
-More features coming soon.
+## Founder
+
+**Prince Eric**
+
+Founder of Vector Codes.
+
+---
+
+© 2026 VectorVault. All rights reserved.
