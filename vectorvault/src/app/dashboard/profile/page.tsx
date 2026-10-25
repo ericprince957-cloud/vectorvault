@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ProfileForm from "@/components/ProfileForm";
+import ChangePassword from "@/components/ChangePassword";
 
 export default async function ProfileSettingsPage() {
   const supabase = await createClient();
@@ -37,7 +38,10 @@ export default async function ProfileSettingsPage() {
       </div>
 
       {profile ? (
-        <ProfileForm profile={profile} />
+        <div className="space-y-8">
+          <ProfileForm profile={profile} />
+          <ChangePassword />
+        </div>
       ) : (
         <p className="text-sm text-zinc-400">
           Profile not found. Please contact support.
