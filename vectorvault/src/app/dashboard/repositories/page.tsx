@@ -12,6 +12,12 @@ export default async function MyRepositoriesPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", user.id)
+    .single();
+
   const { data: repos } = await supabase
     .from("repositories")
     .select("id, name, description, visibility, updated_at")
@@ -45,9 +51,12 @@ export default async function MyRepositoriesPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium text-[#E5C76B]">
+                    <Link
+                      href={"/" + (profile?.username || "") + "/" + repo.name}
+                      className="font-medium text-[#E5C76B] transition hover:text-white"
+                    >
                       {repo.name}
-                    </span>
+                    </Link>
                     <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-zinc-500">
                       {repo.visibility}
                     </span>
