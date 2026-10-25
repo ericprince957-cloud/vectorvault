@@ -1,139 +1,86 @@
 # VectorVault — Next Steps & Setup Guide
 
-This document explains what has been built, what you must do to connect it to
-Supabase, and what remains on the roadmap.
+All application code is complete. Only **two things remain**: connecting your
+Supabase database and deploying to hosting (Vercel).
 
 ---
 
-## 1. What was built (current state)
+## 1. What is built (complete)
 
-### Layout & landing
-- Root layout finalized (your code) with VectorVault metadata and dark theme.
-- Landing page updated with an **Explore** nav link, **Explore projects** CTA
-  and a footer (About, Features, Explore, Docs, GitHub, Contact, copyright).
-
-### Authentication (Supabase Auth)
-- `/signup` — registration with username, full name, email and password
-  (username is stored in user metadata; a database trigger creates the profile).
-- `/login` — email + password login.
-- `/auth/callback` — route that exchanges the auth code for a session
-  (used by email verification links).
-- `src/middleware.ts` — refreshes sessions and blocks unauthenticated
-  access to `/dashboard/*`.
-- `src/components/SignOutButton.tsx` — sign out from the sidebar.
-
-### Dashboard (`/dashboard`)
-- Layout with sidebar: Dashboard, My Repositories, My Profile, Settings, Sign out.
-- Overview page: welcome message, total/public/private repo counts, quick
-  actions, recently updated repositories, and an empty state for new users.
-- My Repositories page with empty state.
-- Create Repository page (name, description, public/private).
-- Profile page (settings): edit full name, bio, location, website, GitHub link,
-  skills. Username is permanent.
-
-### Public pages
-- `/[username]` — public developer profile: avatar, name, bio, location,
-  website, GitHub, skills, join date, and public repositories only.
-- `/explore` — browse/search public repositories and developer profiles
-  without an account.
-
-### Database (`vectorvault/supabase/schema.sql`)
-- Tables: `profiles`, `repositories`, `repository_files`, `stars`, `followers`.
-- Row Level Security policies for every table (public read for public data,
-  owner-only writes, private repo protection).
-- Trigger `handle_new_user` that auto-creates a profile on signup.
-- Storage buckets: `repo-files` (private) and `avatars` (public), with policies.
+- **Landing page** — hero, dashboard preview, features, about, footer, Explore link.
+- **Authentication** — signup (with username), login, email verification,
+  password reset (forgot-password page + email link), change password,
+  session middleware, sign out.
+- **Dashboard** — overview with repo stats and recent activity, empty states,
+  sidebar navigation.
+- **Repositories** — create, rename/edit, change visibility, delete (with file
+  cleanup), My Repositories list, repository settings with danger zone.
+- **Files** — upload (multi-file, 10 MB limit), file list, source code viewer,
+  single-file download, delete, and **download repository as ZIP**
+  (`/api/repos/[id]/zip`).
+- **Profiles** — edit name/bio/location/website/GitHub/skills, public profile
+  at `/username` with follower counts and public repos.
+- **Community** — star repositories, follow developers (buttons + counts on
+  repo and profile pages).
+- **Explore** — browse and search public repositories and developers without
+  an account.
+- **Database** — `vectorvault/supabase/schema.sql` with all 5 tables
+  (profiles, repositories, repository_files, stars, followers), full RLS
+  policies, signup trigger, and storage buckets (`repo-files`, `avatars`).
 
 ---
 
-## 2. How to connect Supabase (do this first)
+## 2. Connect Supabase (REQUIRED — the app will not run without this)
 
-1. **Create a project** at [supabase.com](https://supabase.com) (free tier is fine).
-2. **Run the schema**: in the Supabase dashboard open *SQL Editor → New query*,
-   paste the entire contents of `vectorvault/supabase/schema.sql` and run it.
-   This creates the tables, RLS policies, trigger and storage buckets.
-3. **Get your keys**: *Settings → API*.
-   - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. **Create the env file**: copy `vectorvault/.env.example` to
-   `vectorvault/.env.local` and fill in your values. Never commit
-   `.env.local` and never expose the `service_role` key.
-5. **Configure auth redirect**: in Supabase *Authentication → URL Configuration*,
-   set **Site URL** to `http://localhost:3000` for development and your Vercel
-   domain for production, and add `http://localhost:3000/auth/callback` to the
-   redirect allow-list.
-6. **Enable email confirmations** (optional): *Authentication → Providers → Email*.
-   If you leave it off, users are signed in immediately after signup.
-7. **Install & run**:
+1. Create a project at [supabase.com](https://supabase.com) (free tier works).
+2. Open **SQL Editor → New query**, paste the entire contents of
+   `vectorvault/supabase/schema.sql`, and run it. This creates the tables,
+   RLS policies, the profile trigger, and storage buckets.
+3. Go to **Settings → API** and copy:
+   - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
+   - anon public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Copy `vectorvault/.env.example` to `vectorvault/.env.local` and paste your
+   values. Never commit `.env.local`; never expose the `service_role` key.
+5. In **Authentication → URL Configuration**:
+   - Site URL: `http://localhost:3000` (dev) / your production domain later.
+   - Redirect URLs: add `http://localhost:3000/auth/callback`.
+6. Optionally enable email confirmations under
+   **Authentication → Providers → Email**.
+7. Install and run:
    ```bash
    cd vectorvault
    npm install
    npm run dev
    ```
-   Then test the full flow: sign up → verify email (if enabled) → dashboard →
-   create a repository → edit profile → visit `/your-username` → `/explore`.
+8. Test the full flow: signup → (verify email) → dashboard → create repo →
+   upload files → view source → star → download ZIP → edit profile →
+   change password → visit `/your-username` → `/explore`.
 
 ---
 
-## 3. Deploy to Vercel
+## 3. Deploy to Vercel (REQUIRED)
 
-1. Push this repo to GitHub (done) and import it in Vercel.
-   Set the **root directory** to `vectorvault`.
-2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   as environment variables in Vercel.
-3. Update Supabase *Authentication → URL Configuration* with your production
-   domain and `https://your-domain/auth/callback`.
-4. Deploy. Every push to `main` will now auto-deploy.
-
----
-
-## 4. What still needs to be built
-
-### Phase 3 — Repository management (next priority)
-- **Repository detail page** (`/username/repo-name`) with tabs for files,
-  description and settings.
-- **File upload UI**: drag-and-drop upload to the `repo-files` bucket,
-  inserting rows into `repository_files` (schema + storage policies already exist).
-- **Source code viewer**: fetch file content and display with syntax
-  highlighting (e.g. `shiki` or `prismjs`).
-- **Download**: single-file download and “download repository as ZIP”
-  (iterate `repository_files` and stream from storage; easiest with a
-  server route + `create_zip`-style package or signed URLs).
-- **Edit/delete repository** from the dashboard.
-- **File size/type restrictions** (enforce in upload code AND ideally via
-  storage rules — e.g. max 10 MB per file, block executables).
-
-### Phase 4 — Community
-- **Stars**: buttons on repo cards using the existing `stars` table
-  (insert/unstar, star counts, “starred by you” state).
-- **Follow developers**: follow/unfollow buttons on profiles using `followers`.
-- **Search improvements**: full-text search on descriptions, better profile search.
-- **Repository README/description rendering** (optional markdown support).
-
-### Phase 5 — Git integration (long term)
-- Real `git clone` / `git push` requires server-side Git hosting (bare repos),
-  which Supabase alone does not provide. Options: a VPS with bare repos +
-  git-http-backend, or a third-party Git hosting API. Keep the current
-  upload-based storage as the simple tier and add Git later for power users.
-
-### Security hardening (recommended before launch)
-- Password reset / recovery flow (`resetPasswordForEmail` + `/reset-password` page).
-- Change password page (uses `updateUser`).
-- Rate limiting on signup/login (Supabase has built-in email rate limits;
-  add CAPTCHA in Supabase auth settings if abuse appears).
-- Audit logging for repository deletion.
-- Validate uploaded file types and sizes server-side before storage writes.
-- Keep RLS on at all times — it is your main defense line, per SUPABASE-SECURITY.md.
+1. Import the repo in Vercel with **root directory** set to `vectorvault`.
+2. Add environment variables `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel project settings.
+3. Update Supabase **Authentication → URL Configuration**: set Site URL to
+   your production domain and add `https://your-domain/auth/callback` to
+   the redirect allow-list.
+4. Deploy. Pushes to `main` auto-deploy from now on.
 
 ---
 
-## 5. Suggested build order
+## 4. Optional polish (not required to launch)
 
-1. Connect Supabase and test auth + profile creation end-to-end.
-2. Build the repository detail page + file upload (completes Phase 3 core).
-3. Add the source code viewer and downloads.
-4. Add stars and follows (Phase 4) — tables and policies already exist.
-5. Improve search, then start Git integration research (Phase 5).
+- Syntax highlighting in the source viewer (e.g. shiki or prismjs).
+- Avatar uploads to the `avatars` bucket (bucket + policies already exist;
+  profile pictures currently fall back to initials).
+- Search across repository descriptions (currently searches names and
+  usernames).
+- Rate limiting / CAPTCHA on auth (Supabase has basic email rate limits
+  built in).
+- Git clone/push integration (Phase 5 — needs server-side Git hosting;
+  research a VPS with bare repos or a Git hosting API first).
 
 ---
 
