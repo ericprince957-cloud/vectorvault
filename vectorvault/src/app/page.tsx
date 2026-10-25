@@ -48,6 +48,14 @@ const features = [
   },
 ];
 
+const footerLinks = [
+  { label: "About VectorVault", href: "#about" },
+  { label: "Features", href: "#features" },
+  { label: "Explore Projects", href: "/explore" },
+  { label: "GitHub", href: "https://github.com/ericprince957-cloud/vectorvault" },
+  { label: "Contact", href: "mailto:ericprince957@gmail.com" },
+];
+
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#090909] text-white">
@@ -70,6 +78,10 @@ export default function Home() {
         </a>
 
         <div className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
+          <a href="/explore" className="transition hover:text-white">
+            Explore
+          </a>
+
           <a href="#features" className="transition hover:text-white">
             Features
           </a>
@@ -123,10 +135,10 @@ export default function Home() {
           </a>
 
           <a
-            href="#features"
+            href="/explore"
             className="rounded-lg border border-white/15 px-7 py-3.5 font-medium text-white transition hover:border-white/40"
           >
-            Explore features
+            Explore projects
           </a>
         </div>
 
@@ -273,7 +285,7 @@ export default function Home() {
 
                     <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-zinc-500">
                       <span className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full ${repo.color}`} />
+                        <span className="h-2 w-2 rounded-full bg-blue-400" />
                         {repo.language}
                       </span>
 
@@ -349,11 +361,24 @@ export default function Home() {
           sharing and showcasing code projects more accessible
           to developers in Nigeria and beyond.
         </p>
-
-        <p className="mt-10 text-xs text-zinc-600">
-          © 2026 VectorVault. Built by Vector Codes.
-        </p>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 px-6 py-12 md:px-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-zinc-400">
+            {footerLinks.map((link) => (
+              <a key={link.label} href={link.href} className="transition hover:text-white">
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          <p className="mt-8 text-center text-xs text-zinc-600">
+            VectorVault © 2026. Built by Vector Codes.
+          </p>
+        </div>
+      </footer>
 
     </main>
   );
