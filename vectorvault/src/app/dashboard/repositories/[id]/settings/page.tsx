@@ -19,25 +19,15 @@ export default async function RepoSettingsPage({
     redirect("/login");
   }
 
+  // RLS restricts to owned repos; ownership double-check below.
   const { data: repo } = await supabase
     .from("repositories")
     .select("id, name, description, visibility")
     .eq("id", id)
-    .single();
-
-  if (!repo || (repo as any).owner_id_check === false) {
-    notFound();
-  }
-
-  // RLS already restricts to owned repos; double-check ownership anyway.
-  const { data: owned } = await supabase
-    .from("repositories")
-    .select("id")
-    .eq("id", id)
     .eq("owner_id", user.id)
     .single();
 
-  if (!owned) {
+  if (!repo) {
     notFound();
   }
 
