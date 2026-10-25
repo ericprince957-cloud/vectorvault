@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import FollowButton from "@/components/FollowButton";
 
 export default async function PublicProfilePage({
   params,
@@ -19,6 +20,32 @@ export default async function PublicProfilePage({
 
   if (!profile) {
     notFound();
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isSelf = user?.id === profile.id;
+
+  // Followers / following counts
+  const { count: followers } = await supabase
+    .from("followers")
+    .select("*", { count: "exact", head: true })
+    .eq("following_id", profile.id);
+
+  const { count: following } = await supabase
+    .from("followers")
+    .select("*", { count: "exact", head: true })
+    .eq("follower_id", profile.id);
+
+  let followingByViewer = false;
+  if (user && !isSelf) {
+    const { count: myFollow } = await supabase
+      .from("followers")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", user.id)
+      .eq("following_id", profile.id);
+    followingByViewer = (myFollow ?? 0) > 0;
   }
 
   const { data: repos } = await supabase
@@ -52,7 +79,7 @@ export default async function PublicProfilePage({
       </Link>
 
       {/* Profile header */}
-      <div className="mt-10 flex flex-wrap items-center gap-6 border-b border-white/10 pb-10">
+      <div className="mt-10 flex flex-wrap items-start gap-6 border-b border-white/10 pb-10">
         {profile.avatar_url ? (
           <Image
             src={profile.avatar_url}
@@ -67,11 +94,22 @@ export default async function PublicProfilePage({
           </div>
         )}
 
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {profile.full_name || profile.username}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">@{profile.username}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {profile.full_name || profile.username}
+              </h1>
+              <p className="mt-1 text-sm text-zinc-500">@{profile.username}</p>
+            </div>
+            <FollowButton
+              profileId={profile.id}
+              initialFollowing={followingByViewer}
+              initialCount={followers ?? 0}
+              isAuthed={Boolean(user)}
+              isSelf={Boolean(isSelf)}
+            />
+          </div>
 
           {profile.bio && (
             <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">
@@ -105,6 +143,15 @@ export default async function PublicProfilePage({
               Joined {new Date(profile.created_at).toLocaleDateString()}
             </span>
           </div>
+
+          <div className="mt-4 flex gap-6 text-xs text-zinc-500">
+            <span>
+              <strong className="text-white">{following ?? 0}</strong> following
+            </span>
+            <span>
+              <strong className="text-white">{followers ?? 0}</strong> followers
+            </span>
+          </div>
         </div>
       </div>
 
@@ -134,9 +181,10 @@ export default async function PublicProfilePage({
         {repos && repos.length > 0 ? (
           <div className="space-y-3">
             {repos.map((repo) => (
-              <div
+              <Link
                 key={repo.id}
-                className="rounded-xl border border-white/10 bg-[#141414] p-5 transition hover:border-[#C9A227]/40"
+                href={"/" + profile.username + "/" + repo.name}
+                className="block rounded-xl border border-white/10 bg-[#141414] p-5 transition hover:border-[#C9A227]/40"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -151,7 +199,7 @@ export default async function PublicProfilePage({
                     Updated {new Date(repo.updated_at).toLocaleDateString()}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
