@@ -16,7 +16,9 @@ export default function RepoSettingsForm({ repo }: { repo: RepoSettings }) {
   const router = useRouter();
   const [name, setName] = useState(repo.name);
   const [description, setDescription] = useState(repo.description || "");
-  const [visibility, setVisibility] = useState<"public" | "private">repo.visibility);
+  const [visibility, setVisibility] = useState<"public" | "private">(
+    repo.visibility
+  );
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +49,11 @@ export default function RepoSettingsForm({ repo }: { repo: RepoSettings }) {
       .eq("id", repo.id);
 
     if (updateError) {
-      setError(updateError.code === "23505" ? "You already have a repository with that name." : updateError.message);
+      setError(
+        updateError.code === "23505"
+          ? "You already have a repository with that name."
+          : updateError.message
+      );
       setLoading(false);
       return;
     }
@@ -61,18 +67,13 @@ export default function RepoSettingsForm({ repo }: { repo: RepoSettings }) {
   }
 
   async function handleDelete() {
-    if (
-      !confirm(
-        "Delete this repository and all its files? This cannot be undone."
-      )
-    )
+    if (!confirm("Delete this repository and all its files? This cannot be undone."))
       return;
 
     setDeleting(true);
-
     const supabase = createClient();
 
-    // Remove files from storage
+    // Remove files from storage first
     const { data: files } = await supabase
       .from("repository_files")
       .select("storage_path")
