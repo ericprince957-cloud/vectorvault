@@ -65,9 +65,17 @@ export default async function MyRepositoriesPage() {
                     {repo.description || "No description."}
                   </p>
                 </div>
-                <span className="text-xs text-zinc-600">
-                  Updated {new Date(repo.updated_at).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href={"/dashboard/repositories/" + repo.id + "/settings"}
+                    className="text-xs text-zinc-500 transition hover:text-white"
+                  >
+                    ⚙ Settings
+                  </Link>
+                  <span className="text-xs text-zinc-600">
+                    Updated {new Date(repo.updated_at).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
