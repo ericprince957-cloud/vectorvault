@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import FileUploader from "@/components/FileUploader";
 import DeleteFileButton from "@/components/DeleteFileButton";
+import StarButton from "@/components/StarButton";
 
 export default async function RepositoryPage({
   params,
@@ -43,6 +44,22 @@ export default async function RepositoryPage({
 
   if (repository.visibility !== "public" && !isOwner) {
     notFound();
+  }
+
+  // Stars
+  const { count: starCount } = await supabase
+    .from("stars")
+    .select("*", { count: "exact", head: true })
+    .eq("repository_id", repository.id);
+
+  let starredByViewer = false;
+  if (user) {
+    const { count: myStar } = await supabase
+      .from("stars")
+      .select("*", { count: "exact", head: true })
+      .eq("repository_id", repository.id)
+      .eq("user_id", user.id);
+    starredByViewer = (myStar ?? 0) > 0;
   }
 
   // File list
@@ -128,6 +145,34 @@ export default async function RepositoryPage({
         <p className="mt-3 text-xs text-zinc-600">
           Updated {new Date(repository.updated_at).toLocaleDateString()}
         </p>
+
+        {/* Repository actions */}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <StarButton
+            repositoryId={repository.id}
+            initialStarred={starredByViewer}
+            initialCount={starCount ?? 0}
+            isAuthed={Boolean(user)}
+          />
+
+          {(files?.length ?? 0) > 0 && (
+            <a
+              href={"/api/repos/" + repository.id + "/zip"}
+              className="rounded-lg border border-white/15 px-4 py-1.5 text-xs text-zinc-300 transition hover:border-white/40"
+            >
+              ⬇ Download ZIP
+            </a>
+          )}
+
+          {isOwner && (
+            <Link
+              href={"/dashboard/repositories/" + repository.id + "/settings"}
+              className="rounded-lg border border-white/15 px-4 py-1.5 text-xs text-zinc-300 transition hover:border-white/40"
+            >
+              ⚙ Settings
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Upload (owner only) */}
