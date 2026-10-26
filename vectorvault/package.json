@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.72.0",
+    "@supabase/supabase-js": "^2.118.0",
     "jszip": "^3.10.1",
     "next": "16.4.2",
     "react": "19.3.0",
