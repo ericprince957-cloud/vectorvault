@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -47,6 +48,81 @@ const TEXT_EXTENSIONS = [
   "env", "gitignore", "dockerfile", "toml",
 ];
 
+type RepoFile = {
+  id: string;
+  file_name: string;
+  file_path: string | null;
+  storage_path: string;
+  file_size: number;
+  created_at: string;
+};
+
+type TreeNode = {
+  name: string;
+  path: string;
+  file?: RepoFile;
+  children: TreeNode[];
+};
+
+function buildFileTree(files: RepoFile[]): TreeNode[] {
+  const root: TreeNode[] = [];
+
+  for (const file of files) {
+    const filePath = file.file_path || file.file_name;
+    const parts = filePath.split("/").filter(Boolean);
+
+    let currentLevel = root;
+    let currentPath = "";
+
+    parts.forEach((part, index) => {
+      currentPath = currentPath
+        ? `${currentPath}/${part}`
+        : part;
+
+      const isFile = index === parts.length - 1;
+
+      let node = currentLevel.find(
+        (item) => item.name === part
+      );
+
+      if (!node) {
+        node = {
+          name: part,
+          path: currentPath,
+          children: [],
+        };
+
+        currentLevel.push(node);
+      }
+
+      if (isFile) {
+        node.file = file;
+      } else {
+        currentLevel = node.children;
+      }
+    });
+  }
+
+  function sortNodes(nodes: TreeNode[]) {
+    nodes.sort((a, b) => {
+      const aIsFolder = !a.file;
+      const bIsFolder = !b.file;
+
+      if (aIsFolder !== bIsFolder) {
+        return aIsFolder ? -1 : 1;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
+    nodes.forEach((node) => sortNodes(node.children));
+  }
+
+  sortNodes(root);
+
+  return root;
+}
+
 export default async function RepositoryPage({
   params,
   searchParams,
@@ -59,26 +135,27 @@ export default async function RepositoryPage({
 
   const supabase = await createClient();
 
-  // Get owner profile
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, username, full_name, avatar_url")
     .eq("username", username)
     .single();
 
-  if (!profile) notFound();
+  if (profileError || profile === null) {
+    notFound();
+  }
 
-  // Get repository
-  const { data: repository } = await supabase
+  const { data: repository, error: repositoryError } = await supabase
     .from("repositories")
     .select("id, owner_id, name, description, visibility, updated_at")
     .eq("owner_id", profile.id)
     .eq("name", repo)
     .single();
 
-  if (!repository) notFound();
+  if (repositoryError || repository === null) {
+    notFound();
+  }
 
-  // Check viewer permissions
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -89,7 +166,6 @@ export default async function RepositoryPage({
     notFound();
   }
 
-  // Get star count
   const { count: starCount } = await supabase
     .from("stars")
     .select("*", { count: "exact", head: true })
@@ -107,18 +183,23 @@ export default async function RepositoryPage({
     starredByViewer = (myStar ?? 0) > 0;
   }
 
-  // Get repository files
   const { data: files } = await supabase
     .from("repository_files")
-    .select("id, file_name, storage_path, file_size, created_at")
+    .select(
+      "id, file_name, file_path, storage_path, file_size, created_at"
+    )
     .eq("repository_id", repository.id)
     .order("created_at", { ascending: false });
 
-  const fileList = files ?? [];
+  const fileList = (files ?? []) as RepoFile[];
+  const fileTree = buildFileTree(fileList);
 
-  // Selected file preview
   const selectedFile =
     fileList.find((item) => item.id === selectedFileId) ?? null;
+
+  const selectedFilePath = selectedFile
+    ? selectedFile.file_path || selectedFile.file_name
+    : "";
 
   let fileContent: string | null = null;
   let downloadUrl: string | null = null;
@@ -128,7 +209,7 @@ export default async function RepositoryPage({
 
   if (selectedFile) {
     const extension =
-      selectedFile.file_name.split(".").pop()?.toLowerCase() ?? "";
+      selectedFilePath.split(".").pop()?.toLowerCase() ?? "";
 
     const isTextFile = TEXT_EXTENSIONS.includes(extension);
 
@@ -137,18 +218,20 @@ export default async function RepositoryPage({
     } else if (selectedFile.file_size > MAX_PREVIEW_SIZE) {
       previewError = "This file is too large to preview.";
     } else {
-      const { data: signed, error: signedError } = await supabase.storage
-        .from("repo-files")
-        .createSignedUrl(selectedFile.storage_path, 3600);
+      const { data: signed, error: signedError } =
+        await supabase.storage
+          .from("repo-files")
+          .createSignedUrl(selectedFile.storage_path, 3600);
 
       if (signedError) {
         previewError = signedError.message;
       } else if (signed?.signedUrl) {
         downloadUrl = signed.signedUrl;
 
-        const { data: blob, error: downloadError } = await supabase.storage
-          .from("repo-files")
-          .download(selectedFile.storage_path);
+        const { data: blob, error: downloadError } =
+          await supabase.storage
+            .from("repo-files")
+            .download(selectedFile.storage_path);
 
         if (downloadError) {
           previewError = downloadError.message;
@@ -184,10 +267,95 @@ export default async function RepositoryPage({
 
   function formatSize(bytes: number) {
     if (bytes < 1024) return bytes + " B";
+
     if (bytes < 1024 * 1024) {
       return (bytes / 1024).toFixed(1) + " KB";
     }
+
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function renderTree(nodes: TreeNode[], depth = 0) {
+    return nodes.map((node) => {
+      const isSelected = node.file?.id === selectedFileId;
+
+      // Render files
+      if (node.file) {
+        return (
+          <div
+            key={node.path}
+            className={
+              "rounded-lg border p-3 transition " +
+              (isSelected
+                ? "border-[#C9A227]/60 bg-[#C9A227]/10"
+                : "border-white/10 bg-[#141414] hover:border-white/25")
+            }
+            style={{ marginLeft: `${depth * 12}px` }}
+          >
+            <Link
+              href={
+                "/" +
+                profile.username +
+                "/" +
+                repository.name +
+                "?file=" +
+                node.file.id
+              }
+              className="flex min-w-0 items-center gap-2"
+            >
+              <span className="shrink-0 text-sm">📄</span>
+
+              <span className="truncate font-mono text-xs text-zinc-200">
+                {node.name}
+              </span>
+            </Link>
+
+            <div className="mt-2 flex items-center justify-between pl-6">
+              <span className="text-[10px] text-zinc-600">
+                {formatSize(node.file.file_size)}
+              </span>
+
+              {isOwner && (
+                <DeleteFileButton
+                  fileId={node.file.id}
+                  storagePath={node.file.storage_path}
+                />
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // Render expandable folders
+      return (
+        <details
+          key={node.path}
+          className="group"
+        >
+          <summary
+            className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-zinc-300 transition hover:bg-white/5 hover:text-[#E5C76B]"
+            style={{ marginLeft: `${depth * 12}px` }}
+          >
+            <span className="text-[10px] text-zinc-500 transition-transform group-open:rotate-90">
+              ▶
+            </span>
+
+            <span className="group-open:hidden">📁</span>
+            <span className="hidden group-open:inline">📂</span>
+
+            <span>{node.name}</span>
+
+            <span className="ml-auto text-[10px] text-zinc-600">
+              {node.children.length}
+            </span>
+          </summary>
+
+          <div className="mt-1 space-y-2 border-l border-white/10 ml-4 pl-2">
+            {renderTree(node.children, depth + 1)}
+          </div>
+        </details>
+      );
+    });
   }
 
   return (
@@ -203,8 +371,7 @@ export default async function RepositoryPage({
         .hljs-variable, .hljs-template-variable { color: #f07178; }
         .hljs-params { color: #d4d4d8; }
         .hljs-property { color: #80cbc4; }
-        .hljs-tag { color: #f07178; }
-        .hljs-name { color: #f07178; }
+        .hljs-tag, .hljs-name { color: #f07178; }
         .hljs-attribute { color: #ffcb6b; }
         .hljs-meta { color: #89ddff; }
       `}</style>
@@ -216,7 +383,6 @@ export default async function RepositoryPage({
         ← @{profile.username}
       </Link>
 
-      {/* Repository header */}
       <div className="mt-6 border-b border-white/10 pb-8">
         <div className="flex flex-wrap items-center gap-3">
           {profile.avatar_url ? (
@@ -258,7 +424,6 @@ export default async function RepositoryPage({
           {new Date(repository.updated_at).toLocaleDateString()}
         </p>
 
-        {/* Repository actions */}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <StarButton
             repositoryId={repository.id}
@@ -287,7 +452,6 @@ export default async function RepositoryPage({
         </div>
       </div>
 
-      {/* Upload files */}
       {isOwner && (
         <div className="mt-8">
           <FileUploader
@@ -297,53 +461,21 @@ export default async function RepositoryPage({
         </div>
       )}
 
-      {/* Repository files */}
       <div className="mt-10 grid gap-8 lg:grid-cols-[320px_1fr]">
         <section>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-300">
-            Files ({fileList.length})
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-300">
+              Explorer
+            </h2>
+
+            <span className="text-[10px] text-zinc-600">
+              {fileList.length} files
+            </span>
+          </div>
 
           {fileList.length > 0 ? (
-            <div className="space-y-2">
-              {fileList.map((file) => (
-                <div
-                  key={file.id}
-                  className={
-                    "rounded-lg border p-3 text-sm transition " +
-                    (selectedFileId === file.id
-                      ? "border-[#C9A227]/60 bg-[#C9A227]/10"
-                      : "border-white/10 bg-[#141414] hover:border-white/25")
-                  }
-                >
-                  <Link
-                    href={
-                      "/" +
-                      profile.username +
-                      "/" +
-                      repository.name +
-                      "?file=" +
-                      file.id
-                    }
-                    className="block truncate font-mono text-xs text-zinc-200"
-                  >
-                    {file.file_name}
-                  </Link>
-
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] text-zinc-600">
-                      {formatSize(file.file_size)}
-                    </span>
-
-                    {isOwner && (
-                      <DeleteFileButton
-                        fileId={file.id}
-                        storagePath={file.storage_path}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-1 rounded-xl border border-white/10 bg-[#0d0d0d] p-3">
+              {renderTree(fileTree)}
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-white/15 bg-[#141414] p-8 text-center">
@@ -357,14 +489,13 @@ export default async function RepositoryPage({
           )}
         </section>
 
-        {/* Source code viewer */}
-        <section>
+        <section className="min-w-0">
           {selectedFile ? (
             <div>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="font-mono text-sm text-[#E5C76B]">
-                    {selectedFile.file_name}
+                <div className="min-w-0">
+                  <h2 className="break-all font-mono text-sm text-[#E5C76B]">
+                    {selectedFilePath}
                   </h2>
 
                   {detectedLanguage && (
@@ -378,7 +509,7 @@ export default async function RepositoryPage({
                   <a
                     href={downloadUrl}
                     download={selectedFile.file_name}
-                    className="rounded-lg border border-white/15 px-4 py-1.5 text-xs transition hover:border-white/40"
+                    className="shrink-0 rounded-lg border border-white/15 px-4 py-1.5 text-xs transition hover:border-white/40"
                   >
                     Download
                   </a>
