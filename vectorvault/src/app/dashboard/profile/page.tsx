@@ -6,6 +6,7 @@ import ChangePassword from "@/components/ChangePassword";
 
 export default async function ProfileSettingsPage() {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -16,7 +17,9 @@ export default async function ProfileSettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, full_name, bio, website, location, github_url, skills")
+    .select(
+      "username, full_name, bio, website, location, github_url, skills, avatar_url"
+    )
     .eq("id", user.id)
     .single();
 
@@ -29,6 +32,7 @@ export default async function ProfileSettingsPage() {
             This information appears on your public profile.
           </p>
         </div>
+
         <Link
           href={"/" + (profile?.username || "")}
           className="rounded-lg border border-white/15 px-5 py-2.5 text-sm transition hover:border-white/40"

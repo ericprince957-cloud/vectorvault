@@ -15,7 +15,8 @@
     "jszip": "^3.10.1",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-easy-crop": "^6.2.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
