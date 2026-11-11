@@ -5,9 +5,11 @@ import type { ReactNode } from "react";
 import hljs from "highlight.js/lib/common";
 
 import { createClient } from "@/lib/supabase/server";
+import { getRepoAccess } from "@/lib/repo-access";
 import FileUploader from "@/components/FileUploader";
 import DeleteFileButton from "@/components/DeleteFileButton";
 import StarButton from "@/components/StarButton";
+import TopicChips from "@/components/TopicChips";
 
 const MAX_PREVIEW_SIZE = 500_000;
 
@@ -191,9 +193,13 @@ export default async function RepositoryPage({
 
   const profileUsername = profile.username;
 
+  // RLS only returns repositories the viewer may see:
+  // public, owned, or shared with an accepted collaborator.
   const { data: repository, error: repositoryError } = await supabase
     .from("repositories")
-    .select("id, owner_id, name, description, visibility, updated_at")
+    .select(
+      "id, owner_id, name, description, visibility, topics, updated_at"
+    )
     .eq("owner_id", profile.id)
     .eq("name", repo)
     .single();
@@ -208,9 +214,15 @@ export default async function RepositoryPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isOwner = user?.id === repository.owner_id;
+  const access = await getRepoAccess(repository.id);
+  const isOwner = access.isOwner;
 
-  if (repository.visibility !== "public" && !isOwner) {
+  // Defense in depth: RLS already filtered the fetch above.
+  if (
+    repository.visibility !== "public" &&
+    !isOwner &&
+    !access.canRead
+  ) {
     notFound();
   }
 
@@ -230,6 +242,12 @@ export default async function RepositoryPage({
 
     starredByViewer = (myStar ?? 0) > 0;
   }
+
+  const { count: openIssueCount } = await supabase
+    .from("issues")
+    .select("*", { count: "exact", head: true })
+    .eq("repository_id", repository.id)
+    .eq("status", "open");
 
   const { data: files, error: filesError } = await supabase
     .from("repository_files")
@@ -388,7 +406,7 @@ export default async function RepositoryPage({
                 {formatSize(node.file.file_size)}
               </span>
 
-              {isOwner && (
+              {access.canWrite && (
                 <DeleteFileButton
                   fileId={node.file.id}
                   storagePath={node.file.storage_path}
@@ -481,6 +499,12 @@ export default async function RepositoryPage({
           <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] text-zinc-500">
             {repository.visibility}
           </span>
+
+          {access.role && !isOwner && (
+            <span className="rounded-full border border-[#C9A227]/40 bg-[#C9A227]/10 px-2.5 py-0.5 text-[10px] text-[#E5C76B]">
+              collaborator · {access.role}
+            </span>
+          )}
         </div>
 
         {repository.description && (
@@ -488,6 +512,10 @@ export default async function RepositoryPage({
             {repository.description}
           </p>
         )}
+
+        <div className="mt-4">
+          <TopicChips topics={(repository.topics as string[]) ?? []} />
+        </div>
 
         <p className="mt-3 text-xs text-zinc-600">
           Updated {new Date(repository.updated_at).toLocaleDateString()}
@@ -500,6 +528,13 @@ export default async function RepositoryPage({
             initialCount={starCount ?? 0}
             isAuthed={Boolean(user)}
           />
+
+          <Link
+            href={`/${profileUsername}/${repositoryName}/issues`}
+            className="rounded-lg border border-white/15 px-4 py-1.5 text-xs text-zinc-300 transition hover:border-white/40"
+          >
+            🐞 Issues ({openIssueCount ?? 0})
+          </Link>
 
           {fileList.length > 0 && (
             <a
@@ -518,14 +553,23 @@ export default async function RepositoryPage({
               ⚙ Settings
             </Link>
           )}
+
+          {access.canAdmin && !isOwner && (
+            <Link
+              href={`/dashboard/repositories/${repository.id}/settings/collaborators`}
+              className="rounded-lg border border-white/15 px-4 py-1.5 text-xs text-zinc-300 transition hover:border-white/40"
+            >
+              ⚙ Collaborators
+            </Link>
+          )}
         </div>
       </div>
 
-      {isOwner && (
+      {access.canWrite && (
         <div className="mt-8">
           <FileUploader
             repositoryId={repository.id}
-            ownerId={repository.owner_id}
+            canUpload={access.canWrite}
           />
         </div>
       )}
@@ -550,7 +594,7 @@ export default async function RepositoryPage({
             <div className="rounded-xl border border-dashed border-white/15 bg-[#141414] p-8 text-center">
               <p className="text-sm text-zinc-500">
                 No files yet.
-                {isOwner
+                {access.canWrite
                   ? " Upload your project files above."
                   : " This repository has no files yet."}
               </p>
@@ -659,7 +703,7 @@ export default async function RepositoryPage({
                   </h3>
 
                   <p className="mx-auto mt-2 max-w-sm text-xs leading-6 text-zinc-500">
-                    This file is stored in your repository, but your
+                    This file is stored in the repository, but your
                     browser cannot display this format directly.
                     Download it to open it with a compatible application.
                   </p>

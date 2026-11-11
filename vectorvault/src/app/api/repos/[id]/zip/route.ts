@@ -13,6 +13,8 @@ export async function GET(
     data: { user },
   } = await supabase.auth.getUser();
 
+  // RLS only returns repositories the caller may see:
+  // public, owned, or shared with an accepted collaborator.
   const { data: repo } = await supabase
     .from("repositories")
     .select("id, name, visibility, owner_id")
@@ -23,9 +25,24 @@ export async function GET(
     return NextResponse.json({ error: "Repository not found" }, { status: 404 });
   }
 
-  // Private repos: only the owner may download.
+  // Private repos: owner and accepted collaborators may download.
   if (repo.visibility !== "public" && repo.owner_id !== user?.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    let isMember = false;
+
+    if (user) {
+      const { count } = await supabase
+        .from("repository_collaborators")
+        .select("*", { count: "exact", head: true })
+        .eq("repository_id", repo.id)
+        .eq("user_id", user.id)
+        .eq("status", "accepted");
+
+      isMember = (count ?? 0) > 0;
+    }
+
+    if (!isMember) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
   }
 
   const { data: files } = await supabase

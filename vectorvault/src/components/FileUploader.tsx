@@ -8,10 +8,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export default function FileUploader({
   repositoryId,
-  ownerId,
+  canUpload,
 }: {
   repositoryId: string;
-  ownerId: string;
+  canUpload: boolean;
 }) {
   const router = useRouter();
   const [uploading, setUploading] = useState(false);
@@ -41,8 +41,10 @@ export default function FileUploader({
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user || user.id !== ownerId) {
-        throw new Error("Only the repository owner can upload files.");
+      if (!user || !canUpload) {
+        throw new Error(
+          "You do not have permission to upload files to this repository."
+        );
       }
 
       let successful = 0;
@@ -68,6 +70,9 @@ export default function FileUploader({
         }
 
         const fileName = safePath.split("/").pop()!;
+        // Paths look like <uploader-id>/<repository-id>/... so the
+        // storage and database RLS policies can authorize the
+        // upload for owners and write-level collaborators alike.
         const storagePath = `${user.id}/${repositoryId}/${Date.now()}-${successful}/${safePath}`;
 
         const { error: uploadError } = await supabase.storage
