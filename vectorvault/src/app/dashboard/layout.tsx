@@ -3,10 +3,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/repositories", label: "My Repositories" },
+  { href: "/dashboard/invitations", label: "Invitations" },
+  { href: "/dashboard/notifications", label: "Notifications" },
   { href: "/dashboard/profile", label: "My Profile" },
   { href: "/dashboard/profile", label: "Settings" },
 ];
@@ -42,15 +45,18 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="flex w-full flex-col border-b border-white/10 bg-[#0d0d0d] md:w-64 md:border-b-0 md:border-r">
-        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
-          <Image
-            src="/vectorvault-logo.png"
-            alt="VectorVault logo"
-            width={32}
-            height={32}
-            className="h-8 w-8 object-contain"
-          />
-          <span className="font-semibold tracking-tight">VectorVault</span>
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/vectorvault-logo.png"
+              alt="VectorVault logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
+            <span className="font-semibold tracking-tight">VectorVault</span>
+          </div>
+          <NotificationBell />
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-5 text-sm">
