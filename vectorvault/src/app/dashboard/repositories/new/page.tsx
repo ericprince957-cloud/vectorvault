@@ -3,11 +3,14 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import TopicField from "@/components/TopicField";
+import { normalizeTopics } from "@/lib/topics";
 
 export default function NewRepositoryPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [topics, setTopics] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,11 +38,21 @@ export default function NewRepositoryPage() {
       return;
     }
 
+    const { tags: cleanTopics, error: topicsError } =
+      normalizeTopics(topics);
+
+    if (topicsError) {
+      setError(topicsError);
+      setLoading(false);
+      return;
+    }
+
     const { error: insertError } = await supabase.from("repositories").insert({
       owner_id: user.id,
       name: cleanName,
       description: description.trim() || null,
       visibility,
+      topics: cleanTopics,
     });
 
     if (insertError) {
@@ -96,6 +109,8 @@ export default function NewRepositoryPage() {
           />
         </div>
 
+        <TopicField topics={topics} onChange={setTopics} />
+
         <div>
           <p className="mb-2 text-xs text-zinc-400">Visibility</p>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -115,7 +130,7 @@ export default function NewRepositoryPage() {
                 <p className="mt-1 text-xs text-zinc-500">
                   {option === "public"
                     ? "Anyone on VectorVault can see this repository."
-                    : "Only you can see this repository."}
+                    : "Only you and collaborators can see this repository."}
                 </p>
               </button>
             ))}

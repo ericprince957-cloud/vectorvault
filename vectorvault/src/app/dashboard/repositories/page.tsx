@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import TopicChips from "@/components/TopicChips";
 
 export default async function MyRepositoriesPage() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export default async function MyRepositoriesPage() {
 
   const { data: repos } = await supabase
     .from("repositories")
-    .select("id, name, description, visibility, updated_at")
+    .select("id, name, description, visibility, topics, updated_at")
     .eq("owner_id", user.id)
     .order("updated_at", { ascending: false });
 
@@ -49,7 +50,7 @@ export default async function MyRepositoriesPage() {
               className="rounded-xl border border-white/10 bg-[#141414] p-5 transition hover:border-[#C9A227]/40"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={"/" + (profile?.username || "") + "/" + repo.name}
@@ -64,6 +65,9 @@ export default async function MyRepositoriesPage() {
                   <p className="mt-2 text-xs text-zinc-500">
                     {repo.description || "No description."}
                   </p>
+                  <div className="mt-3">
+                    <TopicChips topics={(repo.topics as string[]) ?? []} small />
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <Link

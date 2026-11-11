@@ -1,15 +1,17 @@
-
 "use client";
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import TopicField from "@/components/TopicField";
+import { normalizeTopics } from "@/lib/topics";
 
 export type RepoSettings = {
   id: string;
   name: string;
   description: string | null;
   visibility: "public" | "private";
+  topics: string[];
   ownerUsername: string;
 };
 
@@ -22,6 +24,7 @@ export default function RepoSettingsForm({
 
   const [name, setName] = useState(repo.name);
   const [description, setDescription] = useState(repo.description || "");
+  const [topics, setTopics] = useState<string[]>(repo.topics ?? []);
   const [visibility, setVisibility] = useState<"public" | "private">(
     repo.visibility
   );
@@ -58,15 +61,26 @@ export default function RepoSettingsForm({
       return;
     }
 
+    const { tags: cleanTopics, error: topicsError } =
+      normalizeTopics(topics);
+
+    if (topicsError) {
+      setError(topicsError);
+      setLoading(false);
+      return;
+    }
+
     try {
       const supabase = createClient();
 
+      // RLS restricts the update to owners and admin collaborators.
       const { data, error: updateError } = await supabase
         .from("repositories")
         .update({
           name: cleanName,
           description: description.trim() || null,
           visibility,
+          topics: cleanTopics,
           updated_at: new Date().toISOString(),
         })
         .eq("id", repo.id)
@@ -83,6 +97,7 @@ export default function RepoSettingsForm({
       }
 
       setSaved(true);
+      setTopics(cleanTopics);
 
       if (cleanName !== repo.name) {
         router.push("/dashboard/repositories");
@@ -136,7 +151,7 @@ export default function RepoSettingsForm({
         }
       }
 
-      // Delete the repository itself.
+      // Delete the repository itself. Only the owner can do this.
       const { data, error: deleteError } = await supabase
         .from("repositories")
         .delete()
@@ -204,6 +219,8 @@ export default function RepoSettingsForm({
           />
         </div>
 
+        <TopicField topics={topics} onChange={setTopics} />
+
         <div>
           <p className="mb-2 text-xs text-zinc-400">Visibility</p>
 
@@ -226,7 +243,7 @@ export default function RepoSettingsForm({
                 <p className="mt-1 text-xs text-zinc-500">
                   {option === "public"
                     ? "Anyone on VectorVault can see this repository."
-                    : "Only you can see this repository."}
+                    : "Only you and accepted collaborators can see this repository."}
                 </p>
               </button>
             ))}
@@ -259,7 +276,8 @@ export default function RepoSettingsForm({
 
         <p className="mt-2 text-xs text-zinc-500">
           Deleting a repository removes its uploaded files and repository
-          records permanently.
+          records permanently. Only the repository owner can delete a
+          repository.
         </p>
 
         {error && (
