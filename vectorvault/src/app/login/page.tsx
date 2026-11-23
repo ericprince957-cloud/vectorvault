@@ -48,7 +48,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Your password"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -84,14 +84,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-[#C9A227] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#E5C76B] disabled:opacity-50"
+          className="w-full rounded-xl border border-[#C9A227]/45 bg-white/[0.035] px-4 py-3.5 text-sm font-semibold text-zinc-100 transition hover:border-[#C9A227]/80 hover:bg-[#C9A227]/[0.07] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
 
         <p className="text-center text-xs text-zinc-500">
           New to VectorVault?{" "}
-          <Link href="/signup" className="text-[#E5C76B] transition hover:text-white">
+          <Link href="/signup" className="text-zinc-300 underline decoration-[#C9A227]/40 underline-offset-4 transition hover:text-[#E5C76B]">
             Create an account
           </Link>
         </p>
