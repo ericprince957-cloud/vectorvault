@@ -11,15 +11,15 @@ export default async function RepositoryGitPage({ params }: { params: Promise<{ 
   if (!user) redirect("/login");
 
   const { data: repo } = await supabase.from("repositories")
-    .select("id,name,owner_id").eq("id", id).maybeSingle();
+    .select("id,name,owner_id,visibility").eq("id", id).maybeSingle();
   if (!repo) notFound();
 
   const access = await getRepoAccess(repo.id);
-  if (!access.canRead) notFound();
+  if (repo.visibility !== "public" && !access.canRead) notFound();
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 md:px-8">
-      <Link href={`/${repo.name}`} className="mb-6 inline-flex text-xs text-zinc-500 hover:text-white">
+      <Link href="/dashboard/repositories" className="mb-6 inline-flex text-xs text-zinc-500 hover:text-white">
         ← Repository workspace
       </Link>
       <GitWorkspace repositoryId={repo.id} repositoryName={repo.name} />
