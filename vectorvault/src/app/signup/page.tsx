@@ -24,9 +24,9 @@ export default function SignupPage() {
 
     const supabase = createClient();
 
-    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "");
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
     if (cleanUsername.length < 3) {
-      setError("Username must be at least 3 characters (letters, numbers, - and _).");
+      setError("Username must be 3–30 characters and use only lowercase letters, numbers and underscores.");
       setLoading(false);
       return;
     }
