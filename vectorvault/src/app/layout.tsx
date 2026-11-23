@@ -10,12 +10,11 @@ export const metadata: Metadata = {
   applicationName: "VectorVault",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "VectorVault" },
-  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], shortcut: "/icon.svg", apple: "/icon-192.png" },
   openGraph: {
     title: "VectorVault — Your code deserves a better home",
     description: "Host your projects, build your developer profile, and connect with the developer community.",
-    siteName: "VectorVault",
-    type: "website",
+    siteName: "VectorVault", type: "website",
   },
 };
 export const viewport: Viewport = { themeColor: "#090909", colorScheme: "dark", viewportFit: "cover" };
