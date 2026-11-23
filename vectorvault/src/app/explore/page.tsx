@@ -140,13 +140,13 @@ export default async function ExplorePage({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
-                        href={`/${repo.owner?.username}/${repo.name}`}
+                        href={`/${repo.owner?.[0]?.username}/${repo.name}`}
                         className="font-medium text-[#E5C76B] transition hover:text-white"
                       >
                         {repo.name}
                       </Link>
                       <span className="text-xs text-zinc-600">
-                        by @{repo.owner?.username}
+                        by @{repo.owner?.[0]?.username}
                       </span>
                     </div>
                     <p className="mt-2 text-xs text-zinc-500">

@@ -66,6 +66,7 @@ export default async function InvitationsPage() {
     .from("profiles")
     .select("id, username")
     .in(
+      "id",
       inviterIds.length > 0
         ? inviterIds
         : ["00000000-0000-0000-0000-000000000000"]

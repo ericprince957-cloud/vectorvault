@@ -128,6 +128,7 @@ export default async function IssuesPage({
     .from("profiles")
     .select("id, username")
     .in(
+      "id",
       authorIds.length > 0
         ? authorIds
         : ["00000000-0000-0000-0000-000000000000"]

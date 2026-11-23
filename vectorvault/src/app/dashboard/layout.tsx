@@ -36,7 +36,7 @@ export default async function DashboardLayout({
 
   const initials = (profile?.full_name || profile?.username || "V")
     .split(" ")
-    .map((part) => part[0])
+    .map((part: string) => part[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
