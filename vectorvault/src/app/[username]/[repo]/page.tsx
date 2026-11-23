@@ -410,6 +410,7 @@ export default async function RepositoryPage({
                 <DeleteFileButton
                   fileId={node.file.id}
                   storagePath={node.file.storage_path}
+                  repositoryId={repository.id}
                 />
               )}
             </div>
