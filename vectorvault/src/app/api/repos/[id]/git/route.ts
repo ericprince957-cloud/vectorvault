@@ -125,9 +125,17 @@ export async function POST(
       .insert({ repository_id: id, name, created_by: user.id, head_commit_id: source.head_commit_id, is_default: false })
       .select("id,name,is_default,head_commit_id,created_at").single();
     if (error) return fail(error.message, 409);
-    const { data: files } = await supabase.from("repository_branch_files")
-      .select("file_path,file_name,storage_path,file_size").eq("branch_id", source.id);
-    if (files?.length) {
+    const { data: committedFiles } = source.head_commit_id
+      ? await supabase.from("repository_commit_files")
+          .select("file_path,file_name,storage_path,file_size")
+          .eq("commit_id", source.head_commit_id)
+      : { data: null };
+    const { data: workingFiles } = !source.head_commit_id
+      ? await supabase.from("repository_branch_files")
+          .select("file_path,file_name,storage_path,file_size").eq("branch_id", source.id)
+      : { data: null };
+    const files = committedFiles ?? workingFiles ?? [];
+    if (files.length) {
       const { error: copyError } = await supabase.from("repository_branch_files")
         .insert(files.map((f: SnapshotFile) => ({ ...f, branch_id: branch.id })));
       if (copyError) return fail(copyError.message, 500);
