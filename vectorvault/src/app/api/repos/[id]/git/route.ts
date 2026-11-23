@@ -81,12 +81,22 @@ export async function GET(
     branches = [{ ...branch, head_commit_id: commit.id }];
   }
 
+  const requestedBranch = new URL(_request.url).searchParams.get("branchId");
+  const selectedBranch = (branches ?? []).find((branch: any) => branch.id === requestedBranch)
+    ?? (branches ?? []).find((branch: any) => branch.is_default)
+    ?? (branches ?? [])[0];
+  const { data: files } = selectedBranch
+    ? await supabase.from("repository_branch_files")
+        .select("id,file_path,file_name,storage_path,file_size,updated_at")
+        .eq("branch_id", selectedBranch.id).order("file_path")
+    : { data: [] };
+
   const { data: commits, error: commitsError } = await supabase
     .from("repository_commits")
     .select("id,branch_id,parent_commit_id,merge_parent_commit_id,author_id,message,created_at")
     .eq("repository_id", id).order("created_at", { ascending: false }).limit(50);
   if (commitsError) return fail(commitsError.message, 500);
-  return NextResponse.json({ branches: branches ?? [], commits: commits ?? [], canWrite: access.canWrite });
+  return NextResponse.json({ branches: branches ?? [], commits: commits ?? [], files: files ?? [], selectedBranchId: selectedBranch?.id ?? null, canWrite: access.canWrite });
 }
 
 export async function POST(
