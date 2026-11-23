@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border border-white/10 bg-[#141414] p-6"
+            className="rounded-2xl border border-white/10 bg-black/40 p-6 shadow-[0_14px_45px_rgba(0,0,0,0.2)] backdrop-blur-xl transition hover:border-[#C9A227]/35"
           >
             <p className="text-3xl font-bold text-[#E5C76B]">
               {stat.value}
@@ -148,7 +148,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-white/15 bg-[#141414] p-12 text-center">
+          <div className="rounded-2xl border border-dashed border-[#C9A227]/25 bg-black/40 p-12 text-center backdrop-blur-xl">
             <p className="font-medium">No repositories yet.</p>
 
             <p className="mt-2 text-sm text-zinc-500">
