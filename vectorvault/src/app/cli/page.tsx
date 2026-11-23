@@ -12,7 +12,7 @@ const commands = [
 
 export default function VectorCliPage() {
   return (
-    <main className="min-h-screen bg-[#090909] px-5 py-16 text-white sm:px-8">
+    <main className="min-h-screen px-5 py-16 text-white sm:px-8">
       <div className="mx-auto max-w-5xl">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-[#E5C76B]">
           <span aria-hidden="true">←</span> VectorVault
@@ -33,7 +33,7 @@ export default function VectorCliPage() {
               feels like Vector.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#commands" className="rounded-lg bg-[#C9A227] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#E5C76B]">
+              <a href="#commands" className="rounded-xl border border-[#D4AF37]/60 bg-black/35 px-5 py-3 text-sm font-semibold text-white backdrop-blur-xl transition hover:border-[#F4E2A0] hover:bg-[#C9A227]/10">
                 Explore commands
               </a>
               <a href="https://github.com/ericprince957-cloud/vectorvault/tree/main/vectorvault/vector-cli" target="_blank" rel="noreferrer" className="rounded-lg border border-white/15 px-5 py-3 text-sm font-medium text-white transition hover:border-[#C9A227]/60">
@@ -42,7 +42,7 @@ export default function VectorCliPage() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101010] shadow-2xl shadow-black/40">
+          <div className="overflow-hidden rounded-2xl border border-white/15 bg-black/55 shadow-2xl shadow-black/50 backdrop-blur-2xl">
             <div className="flex items-center gap-2 border-b border-white/10 px-5 py-4">
               <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
               <span className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
@@ -71,7 +71,7 @@ export default function VectorCliPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {commands.map(([command, description]) => (
-              <div key={command} className="rounded-xl border border-white/10 bg-[#111111] p-4">
+              <div key={command} className="rounded-xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl transition hover:border-[#C9A227]/40 hover:bg-black/55">
                 <code className="break-all text-sm text-[#E5C76B]">{command}</code>
                 <p className="mt-2 text-xs text-zinc-500">{description}</p>
               </div>
@@ -79,7 +79,7 @@ export default function VectorCliPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-[#111111] p-6 sm:p-8">
+        <section className="rounded-2xl border border-[#C9A227]/20 bg-black/45 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#E5C76B]">Early preview</p>
           <h2 className="mt-3 text-xl font-semibold">We are building the engine behind the commands.</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">
