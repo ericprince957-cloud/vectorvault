@@ -19,6 +19,13 @@ export default function DashboardShell({ children, profile }: DashboardShellProp
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const profileHref = profile.username ? `/${profile.username}` : "/dashboard/profile";
+  const navigation = [
+    { label: "Overview", href: "/dashboard", icon: "⌂" },
+    { label: "Repositories", href: "/dashboard/repositories", icon: "▤" },
+    { label: "Issues", href: "/dashboard/issues", icon: "◎", count: "Track" },
+    { label: "Pull requests", href: "/dashboard/pull-requests", icon: "⑂" },
+    { label: "Discussions", href: "/dashboard/discussions", icon: "◌" },
+  ];
   const initials = (profile.fullName || profile.username || "V")
     .split(" ")
     .map((part) => part[0])
@@ -35,20 +42,41 @@ export default function DashboardShell({ children, profile }: DashboardShellProp
         </Link>
       </div>
 
-      <div className="flex flex-1 flex-col items-center gap-5 px-3 py-6">
+      <div className={`shrink-0 px-3 pt-5 ${collapsed ? "flex justify-center" : ""}`}>
         <Link
           href="/dashboard/repositories/new"
           onClick={() => setMobileOpen(false)}
           title="Create repository"
           aria-label="Create repository"
-          className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#D4AF37]/55 bg-[#C9A227]/[0.08] text-3xl font-light leading-none text-[#E5C76B] shadow-[0_0_30px_rgba(201,162,39,0.08)] transition hover:-translate-y-0.5 hover:border-[#F4E2A0] hover:bg-[#C9A227]/15 hover:shadow-[0_0_35px_rgba(201,162,39,0.18)] ${pathname === "/dashboard/repositories/new" ? "ring-1 ring-[#D4AF37]/40" : ""}`}
+          className={`group flex h-11 items-center justify-center gap-2 rounded-xl border border-[#D4AF37]/55 bg-[#C9A227]/[0.08] text-sm font-medium text-[#E5C76B] shadow-[0_0_30px_rgba(201,162,39,0.08)] transition hover:border-[#F4E2A0] hover:bg-[#C9A227]/15 ${collapsed ? "w-11 text-2xl" : "w-full px-4"} ${pathname === "/dashboard/repositories/new" ? "ring-1 ring-[#D4AF37]/40" : ""}`}
         >
-          +
+          <span className="text-xl font-light leading-none">+</span>
+          {!collapsed && <span>Create repository</span>}
         </Link>
-        {!collapsed && <span className="-mt-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">Create</span>}
       </div>
 
-      <div className="flex shrink-0 flex-col items-center gap-3 border-t border-white/10 px-3 py-4">
+      <nav aria-label="Workspace navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
+        {!collapsed && <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-600">Workspace</p>}
+        {navigation.map((item) => {
+          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              title={item.label}
+              aria-label={item.label}
+              className={`group flex h-11 items-center gap-3 rounded-xl px-3 text-[13px] transition ${collapsed ? "justify-center" : ""} ${active ? "border border-[#D4AF37]/20 bg-[#C9A227]/[0.09] text-[#F0D987]" : "border border-transparent text-zinc-400 hover:border-white/[0.07] hover:bg-white/[0.045] hover:text-white"}`}
+            >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none">{item.icon}</span>
+              {!collapsed && <span className="min-w-0 flex-1">{item.label}</span>}
+              {!collapsed && item.count && <span className="rounded-md border border-white/10 px-1.5 py-0.5 text-[9px] text-zinc-600">Soon</span>}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className={`flex shrink-0 flex-col items-center gap-3 border-t border-white/10 px-3 py-4 ${collapsed ? "" : "flex-row justify-start"}`}>
         <Link
           href={profileHref}
           onClick={() => setMobileOpen(false)}
