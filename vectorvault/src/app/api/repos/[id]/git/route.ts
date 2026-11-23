@@ -245,7 +245,9 @@ export async function POST(
         if (removeError) return fail(removeError.message, 500);
       }
     }
-    if (target.id === (branches ?? []).find((branch: any) => branch.is_default)?.id) {
+    const { data: defaultBranch } = await supabase.from("repository_branches")
+      .select("id").eq("repository_id", id).eq("is_default", true).maybeSingle();
+    if (target.id === defaultBranch?.id) {
       await supabase.from("repository_files").delete().eq("repository_id", id);
       if (merged.length) {
         const { error: legacySyncError } = await supabase.from("repository_files").insert(
