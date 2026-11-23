@@ -1,0 +1,13 @@
+{
+  "name": "@vectorcodes/vector-cli",
+  "version": "0.1.0",
+  "description": "The official command-line interface for VectorVault",
+  "type": "module",
+  "bin": {
+    "vector": "./bin/vector.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
