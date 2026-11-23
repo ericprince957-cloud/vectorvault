@@ -545,6 +545,15 @@ export default async function RepositoryPage({
             </a>
           )}
 
+          {access.canWrite && (
+            <Link
+              href={`/dashboard/repositories/${repository.id}/git`}
+              className="rounded-lg border border-[#C9A227]/40 px-4 py-1.5 text-xs text-[#E5C76B] transition hover:bg-[#C9A227]/10"
+            >
+              ⑂ Branches & commits
+            </Link>
+          )}
+
           {isOwner && (
             <Link
               href={`/dashboard/repositories/${repository.id}/settings`}
