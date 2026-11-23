@@ -24,3 +24,40 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+.auth-scenes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #050505;
+}
+.auth-scene {
+  position: absolute;
+  inset: -2%;
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.035);
+  animation: auth-scene-cycle 40s infinite;
+  will-change: opacity, transform;
+}
+.auth-scene-1 { animation-delay: 0s; }
+.auth-scene-2 { animation-delay: 8s; }
+.auth-scene-3 { animation-delay: 16s; }
+.auth-scene-4 { animation-delay: 24s; }
+.auth-scene-5 { animation-delay: 32s; }
+.auth-scene-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(0,0,0,.68), rgba(0,0,0,.58) 48%, rgba(0,0,0,.78)), radial-gradient(ellipse at 50% 45%, transparent 0%, rgba(0,0,0,.38) 100%);
+}
+@keyframes auth-scene-cycle {
+  0%, 4% { opacity: 0; transform: scale(1.035); }
+  8%, 20% { opacity: .72; transform: scale(1); }
+  24%, 100% { opacity: 0; transform: scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-scene { animation: none; }
+  .auth-scene-1 { opacity: .72; }
+}
