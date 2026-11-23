@@ -78,7 +78,7 @@ export default function SignupPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="princeeric"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function SignupPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Prince Eric"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -108,7 +108,7 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
-            className="w-full rounded-lg border border-white/10 bg-[#090909] px-4 py-3 text-sm outline-none transition focus:border-[#C9A227]/60"
+            className="w-full rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-[#C9A227]/45 focus:bg-white/[0.04]"
           />
         </div>
 
@@ -143,14 +143,14 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-[#C9A227] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#E5C76B] disabled:opacity-50"
+          className="w-full rounded-xl border border-[#C9A227]/45 bg-white/[0.035] px-4 py-3.5 text-sm font-semibold text-zinc-100 transition hover:border-[#C9A227]/80 hover:bg-[#C9A227]/[0.07] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>
 
         <p className="text-center text-xs text-zinc-500">
           Already have an account?{" "}
-          <Link href="/login" className="text-[#E5C76B] transition hover:text-white">
+          <Link href="/login" className="text-zinc-300 underline decoration-[#C9A227]/40 underline-offset-4 transition hover:text-[#E5C76B]">
             Sign in
           </Link>
         </p>
