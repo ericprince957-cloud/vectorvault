@@ -4,16 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import SignOutButton from "@/components/SignOutButton";
-import NotificationBell from "@/components/notifications/NotificationBell";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "⌂" },
-  { href: "/dashboard/repositories", label: "Repositories", icon: "▤" },
-  { href: "/dashboard/invitations", label: "Invitations", icon: "✉" },
-  { href: "/dashboard/notifications", label: "Notifications", icon: "◉" },
-  { href: "/dashboard/profile", label: "My Profile", icon: "◎" },
-];
 
 type DashboardShellProps = {
   children: React.ReactNode;
@@ -24,14 +14,11 @@ type DashboardShellProps = {
   };
 };
 
-export default function DashboardShell({
-  children,
-  profile,
-}: DashboardShellProps) {
+export default function DashboardShell({ children, profile }: DashboardShellProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const profileHref = profile.username ? `/${profile.username}` : "/dashboard/profile";
   const initials = (profile.fullName || profile.username || "V")
     .split(" ")
     .map((part) => part[0])
@@ -40,69 +27,42 @@ export default function DashboardShell({
     .toUpperCase();
 
   const sidebar = (
-    <aside
-      className={`flex h-full min-h-0 shrink-0 flex-col border-r border-white/10 bg-[#080808]/80 backdrop-blur-2xl transition-[width] duration-200
-        ${collapsed ? "w-[76px]" : "w-64"}`}
-    >
-      <div className={`flex h-[72px] items-center border-b border-white/10 ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
-        <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-          <Image
-            src="/vectorvault-logo.png"
-            alt="VectorVault logo"
-            width={32}
-            height={32}
-            className="h-8 w-8 shrink-0 object-contain"
-          />
+    <aside className={`flex h-full min-h-0 shrink-0 flex-col border-r border-white/10 bg-[#080808]/85 backdrop-blur-2xl transition-[width] duration-200 ${collapsed ? "w-[76px]" : "w-64"}`}>
+      <div className={`flex h-[72px] shrink-0 items-center border-b border-white/10 ${collapsed ? "justify-center px-2" : "px-5"}`}>
+        <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex min-w-0 items-center gap-3">
+          <Image src="/vectorvault-logo.png" alt="VectorVault logo" width={32} height={32} className="h-8 w-8 shrink-0 object-contain" />
           {!collapsed && <span className="truncate font-semibold tracking-tight">VectorVault</span>}
         </Link>
-        {!collapsed && <NotificationBell />}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5 text-sm">
-        {navItems.map((item) => {
-          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              title={collapsed ? item.label : undefined}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-3 transition
-                ${active ? "bg-[#C9A227]/15 text-[#E5C76B]" : "text-zinc-400 hover:bg-white/5 hover:text-white"}
-                ${collapsed ? "justify-center" : ""}`}
-            >
-              <span aria-hidden="true" className="w-5 shrink-0 text-center text-lg">{item.icon}</span>
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="flex flex-1 flex-col items-center gap-5 px-3 py-6">
+        <Link
+          href="/dashboard/repositories/new"
+          onClick={() => setMobileOpen(false)}
+          title="Create repository"
+          aria-label="Create repository"
+          className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#D4AF37]/55 bg-[#C9A227]/[0.08] text-3xl font-light leading-none text-[#E5C76B] shadow-[0_0_30px_rgba(201,162,39,0.08)] transition hover:-translate-y-0.5 hover:border-[#F4E2A0] hover:bg-[#C9A227]/15 hover:shadow-[0_0_35px_rgba(201,162,39,0.18)] ${pathname === "/dashboard/repositories/new" ? "ring-1 ring-[#D4AF37]/40" : ""}`}
+        >
+          +
+        </Link>
+        {!collapsed && <span className="-mt-3 text-[10px] uppercase tracking-[0.2em] text-zinc-600">Create</span>}
+      </div>
 
-      <div className="border-t border-white/10 p-3">
-        <div className={`mb-4 flex items-center gap-3 ${collapsed ? "justify-center" : "px-1"}`}>
+      <div className="flex shrink-0 flex-col items-center gap-3 border-t border-white/10 px-3 py-4">
+        <Link
+          href={profileHref}
+          onClick={() => setMobileOpen(false)}
+          title={profile.fullName || profile.username || "View profile"}
+          aria-label="View profile"
+          className={`group relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border bg-black/40 transition hover:scale-105 hover:border-[#E5C76B] ${pathname === profileHref || pathname === "/dashboard/profile" ? "border-[#D4AF37]/80 ring-2 ring-[#D4AF37]/15" : "border-white/20"}`}
+        >
           {profile.avatarUrl ? (
-            <Image
-              src={profile.avatarUrl}
-              alt="Profile avatar"
-              width={36}
-              height={36}
-              className="h-9 w-9 shrink-0 rounded-full object-cover"
-            />
+            <Image src={profile.avatarUrl} alt="Your profile" width={44} height={44} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C9A227]/20 text-xs font-bold text-[#E5C76B]">
-              {initials}
-            </div>
+            <span className="text-xs font-semibold text-[#E5C76B]">{initials}</span>
           )}
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-white">{profile.fullName || "Developer"}</p>
-              <p className="truncate text-xs text-zinc-500">@{profile.username || "username"}</p>
-            </div>
-          )}
-        </div>
-        <div className={collapsed ? "flex justify-center" : ""}>
-          <SignOutButton />
-        </div>
+        </Link>
+        {!collapsed && <span className="-mt-2 max-w-full truncate text-[10px] text-zinc-500">Profile</span>}
       </div>
     </aside>
   );
@@ -116,7 +76,7 @@ export default function DashboardShell({
           onClick={() => setCollapsed((value) => !value)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute left-0 top-[84px] z-20 hidden h-8 w-5 translate-x-[calc(16rem-10px)] items-center justify-center rounded-r-md border border-white/10 bg-[#191919] text-xs text-zinc-300 transition-all hover:text-[#E5C76B] md:flex"
+          className="absolute left-0 top-[84px] z-20 hidden h-8 w-5 items-center justify-center rounded-r-md border border-white/10 bg-[#191919] text-xs text-zinc-300 transition hover:text-[#E5C76B] md:flex"
           style={{ transform: collapsed ? "translateX(66px)" : "translateX(246px)" }}
         >
           {collapsed ? "›" : "‹"}
@@ -125,39 +85,25 @@ export default function DashboardShell({
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex md:hidden">
-          <button
-            type="button"
-            aria-label="Close navigation menu"
-            onClick={() => setMobileOpen(false)}
-            className="absolute inset-0 bg-black/70"
-          />
-          <div className="relative z-10 h-full shadow-2xl">
-            {sidebar}
-          </div>
+          <button type="button" aria-label="Close navigation menu" onClick={() => setMobileOpen(false)} className="absolute inset-0 bg-black/70" />
+          <div className="relative z-10 h-full shadow-2xl">{sidebar}</div>
         </div>
       )}
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between border-b border-white/10 bg-black/65 px-4 backdrop-blur-2xl md:hidden">
+        <header className="sticky top-0 z-30 flex h-[68px] shrink-0 items-center justify-between border-b border-white/10 bg-black/65 px-4 backdrop-blur-2xl md:hidden">
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open navigation menu"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-xl text-zinc-200"
-            >
-              ☰
-            </button>
+            <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-xl text-zinc-200">☰</button>
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-              <Image src="/vectorvault-logo.png" alt="" width={28} height={28} className="h-7 w-7 object-contain" />
+              <Image src="/vectorvault-logo.png" alt="" width={27} height={27} className="h-7 w-7 object-contain" />
               VectorVault
             </Link>
           </div>
-          <NotificationBell />
+          <Link href={profileHref} aria-label="View profile" className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#D4AF37]/50 bg-black/40 text-xs font-semibold text-[#E5C76B]">
+            {profile.avatarUrl ? <Image src={profile.avatarUrl} alt="" width={40} height={40} className="h-full w-full object-cover" /> : initials}
+          </Link>
         </header>
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:px-10 md:py-8">
-          {children}
-        </main>
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:px-10 md:py-8">{children}</main>
       </div>
     </div>
   );
