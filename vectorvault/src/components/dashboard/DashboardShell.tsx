@@ -41,7 +41,7 @@ export default function DashboardShell({
 
   const sidebar = (
     <aside
-      className={`flex h-full min-h-0 shrink-0 flex-col border-white/10 bg-[#0d0d0d] transition-[width] duration-200
+      className={`flex h-full min-h-0 shrink-0 flex-col border-r border-white/10 bg-[#080808]/80 backdrop-blur-2xl transition-[width] duration-200
         ${collapsed ? "w-[76px]" : "w-64"}`}
     >
       <div className={`flex h-[72px] items-center border-b border-white/10 ${collapsed ? "justify-center px-2" : "justify-between px-5"}`}>
@@ -108,7 +108,7 @@ export default function DashboardShell({
   );
 
   return (
-    <div className="flex min-h-screen w-full overflow-x-hidden bg-[#090909] text-white">
+    <div className="flex min-h-screen w-full overflow-x-hidden bg-black/25 text-white backdrop-blur-[2px]">
       <div className="relative hidden md:flex">
         {sidebar}
         <button
@@ -138,7 +138,7 @@ export default function DashboardShell({
       )}
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between border-b border-white/10 bg-[#090909]/95 px-4 backdrop-blur md:hidden">
+        <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between border-b border-white/10 bg-black/65 px-4 backdrop-blur-2xl md:hidden">
           <div className="flex items-center gap-3">
             <button
               type="button"
