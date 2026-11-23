@@ -1,13 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const scenes = [
-  "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2200&q=85",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2200&q=85",
-  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2200&q=85",
-  "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=2200&q=85",
-  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=85",
-];
+
 
 export default function AuthCard({
   title,
@@ -19,19 +13,8 @@ export default function AuthCard({
   children: React.ReactNode;
 }) {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050505] px-3 py-3 text-white sm:px-6 sm:py-6">
-      <div aria-hidden="true" className="auth-scenes">
-        {scenes.map((scene, index) => (
-          <div
-            key={scene}
-            className={`auth-scene auth-scene-${index + 1}`}
-            style={{ backgroundImage: `url("${scene}")` }}
-          />
-        ))}
-        <div className="auth-scene-shade" />
-      </div>
-
-      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-1.5rem)] w-full max-w-7xl overflow-hidden rounded-[26px] border border-[#C9A227]/30 bg-black/35 shadow-[0_24px_100px_rgba(0,0,0,0.65)] backdrop-blur-[2px] sm:min-h-[calc(100svh-3rem)] lg:grid-cols-[1.02fr_0.98fr]">
+    <main className="relative min-h-screen overflow-hidden px-3 py-3 text-white sm:px-6 sm:py-6">
+            <div className="relative z-10 mx-auto grid min-h-[calc(100svh-1.5rem)] w-full max-w-7xl overflow-hidden rounded-[26px] border border-[#C9A227]/30 bg-black/35 shadow-[0_24px_100px_rgba(0,0,0,0.65)] backdrop-blur-[2px] sm:min-h-[calc(100svh-3rem)] lg:grid-cols-[1.02fr_0.98fr]">
         <section className="relative flex min-h-[245px] flex-col justify-between overflow-hidden border-b border-[#C9A227]/20 bg-black/25 p-6 backdrop-blur-[2px] sm:p-10 lg:min-h-full lg:border-b-0 lg:border-r lg:border-r-[#C9A227]/20 lg:p-14">
           <div aria-hidden="true" className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full border border-[#C9A227]/15 shadow-[0_0_100px_rgba(201,162,39,0.08)]" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-36 -right-24 h-96 w-96 rounded-full border border-white/10" />
