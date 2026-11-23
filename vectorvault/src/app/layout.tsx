@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import PWARegister from "@/components/PWARegister";
+import ScenicBackdrop from "@/components/ScenicBackdrop";
 import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -20,6 +21,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#090909", colorScheme: "dark", viewportFit: "cover" };
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return <html lang="en" className={geistSans.variable + " " + geistMono.variable + " h-full antialiased"}>
-    <body className="min-h-full flex flex-col bg-[#090909] text-white">{children}<PWARegister /></body>
+    <body className="relative min-h-full bg-[#050505] text-white">{<ScenicBackdrop />}<div className="relative z-10 flex min-h-screen flex-col">{children}</div><PWARegister /></body>
   </html>;
 }
