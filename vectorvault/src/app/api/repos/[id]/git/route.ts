@@ -31,11 +31,11 @@ export async function GET(
   if (!user) return fail("Sign in to view version control.", 401);
 
   const { data: repo } = await supabase.from("repositories")
-    .select("id,owner_id,name").eq("id", id).maybeSingle();
+    .select("id,owner_id,name,visibility").eq("id", id).maybeSingle();
   if (!repo) return fail("Repository not found.", 404);
 
   const access = await getRepoAccess(id);
-  if (!access.canRead) return fail("You cannot access this repository.", 403);
+  if (!access.canRead && repo.visibility !== "public") return fail("You cannot access this repository.", 403);
 
   let { data: branches, error } = await supabase.from("repository_branches")
     .select("id,name,is_default,head_commit_id,created_at")
@@ -223,11 +223,31 @@ export async function POST(
       );
       if (snapError) return fail(snapError.message, 500);
     }
-    await supabase.from("repository_branch_files").delete().eq("branch_id", target.id);
     if (merged.length) {
       const { error: filesError } = await supabase.from("repository_branch_files")
-        .insert(merged.map((f) => ({ ...f, branch_id: target.id })));
+        .upsert(merged.map((f) => ({ ...f, branch_id: target.id })), { onConflict: "branch_id,file_path" });
       if (filesError) return fail(filesError.message, 500);
+    }
+    const mergedPaths = new Set(merged.map((file) => file.file_path));
+    const { data: existingTargetFiles } = await supabase.from("repository_branch_files")
+      .select("id,file_path").eq("branch_id", target.id);
+    for (const existing of existingTargetFiles ?? []) {
+      if (!mergedPaths.has(existing.file_path)) {
+        const { error: removeError } = await supabase.from("repository_branch_files").delete().eq("id", existing.id);
+        if (removeError) return fail(removeError.message, 500);
+      }
+    }
+    if (target.id === (branches ?? []).find((branch: any) => branch.is_default)?.id) {
+      await supabase.from("repository_files").delete().eq("repository_id", id);
+      if (merged.length) {
+        const { error: legacySyncError } = await supabase.from("repository_files").insert(
+          merged.map((file) => ({
+            repository_id: id, file_name: file.file_name, file_path: file.file_path,
+            storage_path: file.storage_path, file_size: file.file_size,
+          }))
+        );
+        if (legacySyncError) return fail(legacySyncError.message, 500);
+      }
     }
     const { error: headError } = await supabase.from("repository_branches")
       .update({ head_commit_id: commit.id }).eq("id", target.id);
