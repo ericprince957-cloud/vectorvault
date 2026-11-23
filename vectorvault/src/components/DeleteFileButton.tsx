@@ -8,9 +8,11 @@ import { createClient } from "@/lib/supabase/client";
 export default function DeleteFileButton({
   fileId,
   storagePath,
+  repositoryId,
 }: {
   fileId: string;
   storagePath: string;
+  repositoryId: string;
 }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
@@ -41,8 +43,13 @@ export default function DeleteFileButton({
         }
       }
 
-      // Remove it from the current working tree while preserving commit snapshots.
-      await supabase.from("repository_branch_files").delete().eq("storage_path", storagePath);
+      // Remove it from the default branch only; feature branches keep their own copies.
+      const { data: defaultBranch } = await supabase.from("repository_branches")
+        .select("id").eq("repository_id", repositoryId).eq("is_default", true).maybeSingle();
+      if (defaultBranch) {
+        await supabase.from("repository_branch_files").delete()
+          .eq("branch_id", defaultBranch.id).eq("storage_path", storagePath);
+      }
 
       // Remove its legacy repository file record.
       const { error: databaseError } = await supabase
