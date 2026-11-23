@@ -1,5 +1,4 @@
 
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -82,37 +81,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick actions */}
-      <div className="mb-10 flex flex-wrap gap-3">
-        <Link
-          href="/dashboard/repositories/new"
-          className="rounded-lg bg-[#C9A227] px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-[#E5C76B]"
-        >
-          + Create repository
-        </Link>
-
-        <Link
-          href="/dashboard/profile"
-          className="rounded-lg border border-white/15 px-5 py-2.5 text-sm transition hover:border-white/40"
-        >
-          Edit profile
-        </Link>
-
-        <Link
-          href={username ? `/${username}` : "/dashboard/profile"}
-          className="rounded-lg border border-white/15 px-5 py-2.5 text-sm transition hover:border-white/40"
-        >
-          View public profile
-        </Link>
-
-        <Link
-          href="/explore"
-          className="rounded-lg border border-white/15 px-5 py-2.5 text-sm transition hover:border-white/40"
-        >
-          Explore projects
-        </Link>
-      </div>
-
       {/* Recent repositories */}
       <div>
         <h2 className="mb-4 text-lg font-semibold">
@@ -125,7 +93,7 @@ export default async function DashboardPage() {
               <Link
                 key={repo.id}
                 href={`/${username}/${encodeURIComponent(repo.name)}`}
-                className="block rounded-xl border border-white/10 bg-[#141414] p-5 transition hover:border-[#C9A227]/60 hover:bg-[#191919] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A227]"
+                className="block rounded-2xl border border-white/10 bg-black/40 p-5 backdrop-blur-xl transition hover:border-[#C9A227]/45 hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A227]"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-[#E5C76B]">
@@ -156,12 +124,7 @@ export default async function DashboardPage() {
               VectorVault.
             </p>
 
-            <Link
-              href="/dashboard/repositories/new"
-              className="mt-6 inline-block rounded-lg bg-[#C9A227] px-6 py-3 text-sm font-semibold text-black transition hover:bg-[#E5C76B]"
-            >
-              Create repository
-            </Link>
+     </Link>
           </div>
         )}
       </div>
