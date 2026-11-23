@@ -58,10 +58,10 @@ const footerLinks = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#090909] text-white">
+    <main className="min-h-screen overflow-hidden text-white">
 
       {/* Navigation */}
-      <nav className="flex items-center justify-between border-b border-white/10 px-6 py-5 md:px-16">
+      <nav className="flex items-center justify-between border-b border-white/10 bg-black/25 px-6 py-5 backdrop-blur-xl md:px-16">
         <a href="/" className="flex items-center gap-3">
           <Image
             src="/vectorvault-logo.png"
@@ -101,7 +101,7 @@ export default function Home() {
 
           <a
             href="/signup"
-            className="rounded-lg bg-[#C9A227] px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#E5C76B]"
+            className="rounded-xl border border-[#C9A227]/55 bg-black/25 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_0_28px_rgba(201,162,39,0.08)] backdrop-blur-xl transition hover:border-[#E5C76B] hover:bg-[#C9A227]/10"
           >
             Get started
           </a>
@@ -110,14 +110,14 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="px-6 pb-20 pt-28 text-center md:px-16 md:pt-36">
-        <div className="mx-auto mb-8 w-fit rounded-full border border-[#C9A227]/30 bg-[#C9A227]/5 px-4 py-2 text-xs text-[#E5C76B]">
+        <div className="mx-auto mb-8 w-fit rounded-full border border-[#C9A227]/40 bg-black/25 px-4 py-2 text-xs text-[#E5C76B] shadow-[0_0_35px_rgba(201,162,39,0.08)] backdrop-blur-xl">
           Built for developers. Made for Africa.
         </div>
 
         <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
           Your code deserves
           <br />
-          <span className="text-[#E5C76B]">a better home.</span>
+          <span className="bg-gradient-to-r from-[#F4E2A0] via-[#D4AF37] to-[#9D7920] bg-clip-text text-transparent">a better home.</span>
         </h1>
 
         <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-zinc-400 md:text-lg">
@@ -129,14 +129,14 @@ export default function Home() {
         <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
           <a
             href="/signup"
-            className="rounded-lg bg-[#C9A227] px-7 py-3.5 font-semibold text-black transition hover:bg-[#E5C76B]"
+            className="rounded-xl border border-[#D4AF37]/65 bg-black/35 px-7 py-3.5 font-semibold text-white shadow-[0_8px_35px_rgba(0,0,0,0.25)] backdrop-blur-xl transition hover:border-[#F4E2A0] hover:bg-[#C9A227]/15"
           >
             Create your account →
           </a>
 
           <a
             href="/explore"
-            className="rounded-lg border border-white/15 px-7 py-3.5 font-medium text-white transition hover:border-white/40"
+            className="rounded-xl border border-white/25 bg-white/[0.06] px-7 py-3.5 font-medium text-white backdrop-blur-xl transition hover:border-[#D4AF37]/55 hover:bg-white/10"
           >
             Explore projects
           </a>
@@ -149,7 +149,7 @@ export default function Home() {
 
       {/* Repository Preview */}
       <section className="px-5 pb-24 md:px-16">
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-2xl shadow-black">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/15 bg-[#090909]/70 shadow-[0_30px_100px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
 
           {/* Window Header */}
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
@@ -259,7 +259,7 @@ export default function Home() {
                 {repositories.map((repo) => (
                   <div
                     key={repo.name}
-                    className="rounded-xl border border-white/10 bg-[#151515] p-4 transition hover:border-[#C9A227]/40"
+                    className="rounded-xl border border-white/10 bg-white/[0.035] p-4 backdrop-blur-md transition hover:border-[#C9A227]/45 hover:bg-white/[0.06]"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -306,7 +306,7 @@ export default function Home() {
       {/* Features Section */}
       <section
         id="features"
-        className="border-t border-white/10 px-6 py-24 md:px-16"
+        className="border-t border-white/10 bg-black/15 px-6 py-24 backdrop-blur-sm md:px-16"
       >
         <div className="mx-auto max-w-6xl">
 
@@ -328,7 +328,7 @@ export default function Home() {
             {features.map((feature) => (
               <div
                 key={feature.number}
-                className="rounded-xl border border-white/10 bg-[#141414] p-7 transition hover:border-[#C9A227]/40"
+                className="group rounded-2xl border border-white/10 bg-black/35 p-7 shadow-[0_12px_45px_rgba(0,0,0,0.2)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#C9A227]/45 hover:bg-black/50"
               >
                 <span className="text-sm text-[#C9A227]">
                   {feature.number}
@@ -350,7 +350,7 @@ export default function Home() {
       {/* About Section */}
       <section
         id="about"
-        className="border-t border-white/10 px-6 py-20 text-center md:px-16"
+        className="border-t border-white/10 bg-black/15 px-6 py-20 text-center backdrop-blur-sm md:px-16"
       >
         <h2 className="text-2xl font-bold">
           Created with developers in mind.
