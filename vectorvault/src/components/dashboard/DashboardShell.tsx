@@ -109,7 +109,7 @@ export default function DashboardShell({
 
   return (
     <div className="flex min-h-screen w-full overflow-x-hidden bg-[#090909] text-white">
-      <div className="hidden md:flex">
+      <div className="relative hidden md:flex">
         {sidebar}
         <button
           type="button"
