@@ -25,17 +25,26 @@ export default function DeleteFileButton({
     try {
       const supabase = createClient();
 
-      // Remove the file from Supabase Storage first.
-      const { error: storageError } = await supabase.storage
-        .from("repo-files")
-        .remove([storagePath]);
+      // Keep the immutable object if any commit snapshot references it.
+      const { count: snapshotReferences } = await supabase
+        .from("repository_commit_files")
+        .select("*", { count: "exact", head: true })
+        .eq("storage_path", storagePath);
 
-      if (storageError) {
-        setError("Storage error: " + storageError.message);
-        return;
+      if ((snapshotReferences ?? 0) === 0) {
+        const { error: storageError } = await supabase.storage
+          .from("repo-files")
+          .remove([storagePath]);
+        if (storageError) {
+          setError("Storage error: " + storageError.message);
+          return;
+        }
       }
 
-      // Remove its database record.
+      // Remove it from the current working tree while preserving commit snapshots.
+      await supabase.from("repository_branch_files").delete().eq("storage_path", storagePath);
+
+      // Remove its legacy repository file record.
       const { error: databaseError } = await supabase
         .from("repository_files")
         .delete()
