@@ -100,6 +100,26 @@ export default function FileUploader({
           continue;
         }
 
+        // Keep the default Git branch working tree in sync with normal repository uploads.
+        const { data: defaultBranch } = await supabase
+          .from("repository_branches")
+          .select("id")
+          .eq("repository_id", repositoryId)
+          .eq("is_default", true)
+          .maybeSingle();
+        if (defaultBranch) {
+          const { error: branchFileError } = await supabase
+            .from("repository_branch_files")
+            .upsert({
+              branch_id: defaultBranch.id,
+              file_path: safePath,
+              file_name: fileName,
+              storage_path: storagePath,
+              file_size: file.size,
+            }, { onConflict: "branch_id,file_path" });
+          if (branchFileError) errors.push(`${relativePath}: branch snapshot sync failed: ${branchFileError.message}`);
+        }
+
         successful++;
         setProgress(`Uploaded ${successful} of ${selectedFiles.length} files`);
       }
