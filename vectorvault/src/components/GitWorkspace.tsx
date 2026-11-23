@@ -74,6 +74,13 @@ export default function GitWorkspace({ repositoryId, repositoryName }: { reposit
         branch_id: selected, file_path: safeName, file_name: safeName, storage_path: storagePath, file_size: file.size,
       }, { onConflict: "branch_id,file_path" });
       if (rowError) throw rowError;
+      if (branches.find((branch) => branch.id === selected)?.is_default) {
+        await supabase.from("repository_files").delete().eq("repository_id", repositoryId).eq("file_path", safeName);
+        const { error: legacyError } = await supabase.from("repository_files").insert({
+          repository_id: repositoryId, file_name: safeName, file_path: safeName, storage_path: storagePath, file_size: file.size,
+        });
+        if (legacyError) throw legacyError;
+      }
       setNotice(`${safeName} added to this branch. Create a commit to save this snapshot.`);
       await load(selected);
     } catch (e) { setError(e instanceof Error ? e.message : "Upload failed."); }
@@ -85,6 +92,11 @@ export default function GitWorkspace({ repositoryId, repositoryName }: { reposit
     const supabase = createClient();
     const { error: deleteError } = await supabase.from("repository_branch_files").delete().eq("id", file.id);
     if (deleteError) { setError(deleteError.message); return; }
+    if (branches.find((branch) => branch.id === selected)?.is_default) {
+      const { error: legacyError } = await supabase.from("repository_files").delete()
+        .eq("repository_id", repositoryId).eq("file_path", file.file_path);
+      if (legacyError) { setError(legacyError.message); return; }
+    }
     await load(selected);
     setNotice("File removed from the branch working tree. Commit the change to record it.");
   }
