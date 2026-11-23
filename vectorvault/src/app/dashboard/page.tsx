@@ -1,4 +1,5 @@
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -124,7 +125,6 @@ export default async function DashboardPage() {
               VectorVault.
             </p>
 
-     </Link>
           </div>
         )}
       </div>
